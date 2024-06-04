@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "School_API", "School_API\School_API.csproj", "{DF6FC4FE-F0A0-49A4-9600-834FABC3AC4E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedModels", "SharedModels\SharedModels.csproj", "{1A89EC06-5539-4FB7-98C0-EC55C078C4BB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF6FC4FE-F0A0-49A4-9600-834FABC3AC4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF6FC4FE-F0A0-49A4-9600-834FABC3AC4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF6FC4FE-F0A0-49A4-9600-834FABC3AC4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF6FC4FE-F0A0-49A4-9600-834FABC3AC4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A89EC06-5539-4FB7-98C0-EC55C078C4BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A89EC06-5539-4FB7-98C0-EC55C078C4BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A89EC06-5539-4FB7-98C0-EC55C078C4BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A89EC06-5539-4FB7-98C0-EC55C078C4BB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A52AC98A-C8B2-4917-BF56-133DD188497E}
+	EndGlobalSection
+EndGlobal
