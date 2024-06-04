@@ -12,6 +12,5 @@ namespace School_API
             CreateMap<Student, StudentCreateDto>().ReverseMap();
             CreateMap<Student, StudentUpdateDto>().ReverseMap();
         }
-
     }
 }
