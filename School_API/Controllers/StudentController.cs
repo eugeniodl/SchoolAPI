@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using School_API.Data;
@@ -128,6 +130,180 @@ namespace School_API.Controllers
                 _logger.LogError($"Error al crear un nuevo estudiante: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError,
                     "Error interno del servidor al crear un nuevo estudiante.");
+            }
+        }
+
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PutStudent(int id, StudentUpdateDto updateDto)
+        {
+            if(updateDto == null || id != updateDto.StudentId)
+            {
+                return BadRequest("Los datos de entrada no son válidos " +
+                    "o el ID de estudiante no coincida.");
+            }
+
+            try
+            {
+                _logger.LogInformation($"Actualizando estudiante con ID: {id}");
+
+                var existingStudent = await _context.Students.FindAsync(id);
+                if (existingStudent == null)
+                {
+                    _logger.LogWarning($"No se encontró ningún estudiante con ID: {id}");
+                    return NotFound("El estudiante no existe");
+                }
+
+                // Actualizar solo las propiedades necesarias del estudiante existente
+                _mapper.Map(updateDto, existingStudent);
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Estudiante con ID {id} actualizado correctamente.");
+
+                return NoContent();
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                if (!StudentExists(id))
+                {
+                    _logger.LogWarning($"No se encontró ningún estudiante con ID: {id}");
+                    return NotFound("El estudiante no se encontró durante la actualización.");
+                }
+                else
+                {
+                    _logger.LogError($"Error de concurrencia al actualizar el estudiante " +
+                        $"con ID: {id}. Detalles: {ex.Message}");
+                    return StatusCode(StatusCodes.Status500InternalServerError,
+                        "Error interno del servidor al actualizar el estudiante.");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al actualizar el estudiante con ID {id}: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error interno del servidor al actualizar el estudiante.");
+            }
+        }
+
+        private bool StudentExists(int id)
+        {
+            return _context.Students.Any(e => e.StudentId == id);
+        }
+
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteStudent(int id)
+        {
+            try
+            {
+                _logger.LogInformation($"Eliminando estudiante con ID: {id}");
+
+                var student = await _context.Students.FindAsync(id);
+                if (student == null)
+                {
+                    _logger.LogWarning($"No se encontró ningún estudiante con ID: {id}");
+                    return NotFound("Estudiante no encontrado.");
+                }
+
+                _context.Students.Remove(student);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Estudiante con ID {id} eliminado correctamente.");
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al eliminar el estudiante con ID {id}: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Se produjo un error al eliminar el estudiante.");
+            }
+        }
+
+        [HttpPatch("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PatchStudent(int id, 
+            JsonPatchDocument<StudentUpdateDto> patchDto)
+        {
+            if(id <= 0)
+            {
+                return BadRequest("ID de estudiante no válido.");
+            }
+
+            try
+            {
+                _logger.LogInformation($"Aplicando el parche al estudiante con ID: {id}");
+
+                var student = await _context.Students.FindAsync(id);
+                if (student == null)
+                {
+                    _logger.LogWarning($"No se encontró ningín estudiante con ID: {id}");
+                    return NotFound("El estudiante no se encontró");
+                }
+
+                var studentDto = _mapper.Map<StudentUpdateDto>(student);
+
+                patchDto.ApplyTo(studentDto, ModelState);
+
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("El modelo de estudiante después de aplicar el parche " +
+                        "no es válido");
+                    return BadRequest(ModelState);
+                }
+
+                _mapper.Map(studentDto, student); // aplicar cambios al objeto original
+
+                using (var transaction = await _context.Database.BeginTransactionAsync())
+                {
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                        transaction.Commit();
+                        _logger.LogInformation($"Parche aplicado correctamente al estudiante " +
+                            $"con ID: {id}");
+                        return NoContent();
+                    }
+                    catch (DbUpdateConcurrencyException ex)
+                    {
+                        if (!StudentExists(id))
+                        {
+                            _logger.LogWarning($"No se encontró ningún estudiante con ID: {id}");
+                            return NotFound("El estudiante no se encontró durante la aplicación del parche.");
+                        }
+                        else
+                        {
+                            _logger.LogError($"Error de concurrencia al aplicar el parche al estudiante " +
+                                $"con ID: {id}. Detalles: {ex.Message}");
+                            return StatusCode(StatusCodes.Status500InternalServerError,
+                                "Error interno del servidor al aplicar el parche al estudiante.");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Error al aplicar el parche al estudiante con ID {id}: " +
+                            $"{ex.Message}");
+                        transaction.Rollback();
+                        return StatusCode(StatusCodes.Status500InternalServerError,
+                            "Error interno del servidor al aplicar el parche al estudiante.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error al aplicar el parche al estudiante con ID {id}: " +
+                            $"{ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    "Error interno del servidor al aplicar el parche al estudiante.");
+
             }
         }
     }
