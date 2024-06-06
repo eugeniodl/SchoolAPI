@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using School_API;
 using School_API.Data;
+using School_API.Repository;
+using School_API.Repository.IRepository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +13,8 @@ builder.Services.AddDbContext<SchoolContext>(options =>
 builder.Services.AddAutoMapper(typeof(MappingConfig));
 
 builder.Services.AddControllers().AddNewtonsoftJson();
+
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
