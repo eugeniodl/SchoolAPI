@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using School_API.Data;
 using School_API.Dto;
+using School_API.Repository.IRepository;
 using SharedModels;
 
 namespace School_API.Controllers
@@ -12,14 +12,14 @@ namespace School_API.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        private readonly SchoolContext _context;
+        private readonly IStudentRepository _studentRepo;
         private readonly ILogger<StudentController> _logger;
         private readonly IMapper _mapper;
 
-        public StudentController(SchoolContext context,
+        public StudentController(IStudentRepository studentRepo,
             ILogger<StudentController> logger, IMapper mapper)
         {
-            _context = context;
+            _studentRepo = studentRepo;
             _logger = logger;
             _mapper = mapper;
         }
@@ -33,7 +33,7 @@ namespace School_API.Controllers
             {
                 _logger.LogInformation("Obteniendo los estudiantes");
 
-                var students = await _context.Students.ToListAsync();
+                var students = await _studentRepo.GetAllAsync();
 
                 return Ok(_mapper.Map<IEnumerable<StudentDto>>(students));
             }
@@ -62,7 +62,7 @@ namespace School_API.Controllers
             {
                 _logger.LogInformation($"Obteniendo estudiante con ID: {id}");
 
-                var student = await _context.Students.FindAsync(id);
+                var student = await _studentRepo.GetByIdAsync(id);
 
                 if (student == null)
                 {
@@ -97,8 +97,8 @@ namespace School_API.Controllers
                 _logger.LogInformation($"Creando un nuevo estudiante con nombre: {createDto.Name}");
 
                 // Verificar si el estudiante ya existe
-                var existingStudent = await _context.Students
-                    .FirstOrDefaultAsync(s => s.Name != null && s.Name.ToLower()
+                var existingStudent = await _studentRepo
+                    .GetAsync(s => s.Name != null && s.Name.ToLower()
                     == createDto.Name.ToLower());
 
                 if (existingStudent != null)
@@ -118,8 +118,7 @@ namespace School_API.Controllers
                 // Crear el nuevo estudiante
                 var newStudent = _mapper.Map<Student>(createDto);
 
-                _context.Students.Add(newStudent);
-                await _context.SaveChangesAsync();
+                await _studentRepo.CreateAsync(newStudent);
 
                 _logger.LogInformation($"Nuevo estudiante '{createDto.Name}' creado con ID: " +
                     $"{newStudent.StudentId}");
@@ -150,7 +149,7 @@ namespace School_API.Controllers
             {
                 _logger.LogInformation($"Actualizando estudiante con ID: {id}");
 
-                var existingStudent = await _context.Students.FindAsync(id);
+                var existingStudent = await _studentRepo.GetByIdAsync(id);
                 if (existingStudent == null)
                 {
                     _logger.LogWarning($"No se encontró ningún estudiante con ID: {id}");
@@ -160,14 +159,14 @@ namespace School_API.Controllers
                 // Actualizar solo las propiedades necesarias del estudiante existente
                 _mapper.Map(updateDto, existingStudent);
 
-                await _context.SaveChangesAsync();
+                await _studentRepo.SaveChangesAsync();
 
                 _logger.LogInformation($"Estudiante con ID {id} actualizado correctamente.");
                 return NoContent();
             }
             catch(DbUpdateConcurrencyException ex)
             {
-                if(!StudentExists(id))
+                if(!await _studentRepo.ExistsAsync(s => s.StudentId == id))
                 {
                     _logger.LogWarning($"No se encontró ningún estudiante con ID: {id}");
                     return NotFound("El estudiante no se encontró durante la actualización.");
@@ -189,11 +188,6 @@ namespace School_API.Controllers
             }
         }
 
-        private bool StudentExists(int id)
-        {
-            return _context.Students.Any(s => s.StudentId == id);
-        }
-
         [HttpDelete]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -204,16 +198,15 @@ namespace School_API.Controllers
             {
                 _logger.LogInformation($"Eliminando estudiante con ID: {id}");
 
-                var student = await _context.Students.FindAsync(id);
+                var student = await _studentRepo.GetByIdAsync(id);
                 if (student == null)
                 {
                     _logger.LogWarning($"No se encontró ningún estudiante con ID: {id}");
                     return NotFound("Estudiante no encontrado.");
                 }
 
-                _context.Students.Remove(student);
-                await _context.SaveChangesAsync();
-
+                await _studentRepo.DeleteAsync(student);
+                
                 _logger.LogInformation($"Estudiante con ID {id} eliminado correctamente.");
                 return NoContent();
             }
@@ -243,7 +236,7 @@ namespace School_API.Controllers
             {
                 _logger.LogInformation($"Aplicando el parche al estudiante con ID: {id}");
 
-                var student = await _context.Students.FindAsync(id);
+                var student = await _studentRepo.GetByIdAsync(id);
                 if (student == null)
                 {
                     _logger.LogWarning($"No se encontró ningún estudiante con ID: {id}");
@@ -263,11 +256,11 @@ namespace School_API.Controllers
 
                 _mapper.Map(studentDto, student); // Aplicar cambios al objeto original
 
-                using (var transaction = await _context.Database.BeginTransactionAsync())
+                using (var transaction = await _studentRepo.BeginTransactionAsync())
                 {
                     try
                     {
-                        await _context.SaveChangesAsync();
+                        await _studentRepo.SaveChangesAsync();
                         transaction.Commit();
                         _logger.LogInformation($"Parche aplicado correctamente al estudiante " +
                             $"con ID: {id}");
@@ -275,7 +268,7 @@ namespace School_API.Controllers
                     }
                     catch (DbUpdateConcurrencyException ex)
                     {
-                        if (!StudentExists(id))
+                        if (!await _studentRepo.ExistsAsync(s => s.StudentId == id))
                         {
                             _logger.LogWarning($"No se encontró ningún estudiante con ID: {id}");
                             return NotFound();
