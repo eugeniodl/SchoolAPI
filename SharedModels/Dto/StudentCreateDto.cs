@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace School_API.Dto
+namespace SharedModels.Dto
 {
     public class StudentCreateDto
     {
