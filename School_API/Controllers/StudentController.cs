@@ -1,13 +1,10 @@
 ﻿using AutoMapper;
-using Azure;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using School_API.Data;
-using School_API.Dto;
 using School_API.Repository.IRepository;
 using SharedModels;
+using SharedModels.Dto;
 
 namespace School_API.Controllers
 {
@@ -155,7 +152,7 @@ namespace School_API.Controllers
                 var existingStudent = await _studentRepo.GetById(id);
                 if (existingStudent == null)
                 {
-                    _logger.LogInformation($"No se encontró nungún estudiante con ID: {id}");
+                    _logger.LogInformation($"No se encontró ningún estudiante con ID: {id}");
                     return NotFound("El estudiante no existe.");
                 }
 
