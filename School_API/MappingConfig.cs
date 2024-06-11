@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using School_API.Dto;
 using SharedModels;
+using SharedModels.Dto;
 
 namespace School_API
 {
@@ -11,7 +11,9 @@ namespace School_API
             CreateMap<Student, StudentDto>().ReverseMap();
             CreateMap<Student, StudentCreateDto>().ReverseMap();
             CreateMap<Student, StudentUpdateDto>().ReverseMap();
-
+            CreateMap<Attendance, AttendanceDto>().ReverseMap();
+            CreateMap<Attendance, AttendanceCreateDto>().ReverseMap();
+            CreateMap<Attendance, AttendanceUpdateDto>().ReverseMap();
         }
     }
 }

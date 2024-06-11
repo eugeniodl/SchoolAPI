@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using School_API.Dto;
 using School_API.Repository.IRepository;
 using SharedModels;
+using SharedModels.Dto;
 
 namespace School_API.Controllers
 {
