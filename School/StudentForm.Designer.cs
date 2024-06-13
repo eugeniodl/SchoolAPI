@@ -103,6 +103,7 @@
             btnDelete.TabIndex = 6;
             btnDelete.Text = "Eliminar";
             btnDelete.UseVisualStyleBackColor = true;
+            btnDelete.Click += btnDelete_Click;
             // 
             // dgvStudent
             // 
