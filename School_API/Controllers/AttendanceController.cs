@@ -29,7 +29,7 @@ namespace School_API.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<AttendanceDto>> GetAttendances()
+        public async Task<ActionResult<IEnumerable<AttendanceDto>>> GetAttendances()
         {
             try
             {

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using School_API.Filters;
 using School_API.Repository.IRepository;
 using SharedModels;
 using SharedModels.Dto;
@@ -24,9 +25,11 @@ namespace School_API.Controllers
         }
 
         [HttpGet]
+        [MyLoggingAsync("AllStudents")]
+        [MyLogging("AllStudents")]        
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<StudentDto>> GetStudent()
+        public async Task<ActionResult<IEnumerable<StudentDto>>> GetStudents()
         {
             try
             {
@@ -45,6 +48,7 @@ namespace School_API.Controllers
         }
 
         [HttpGet("{id}")]
+        [MyLoggingAsync("GetSingleStudent")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
