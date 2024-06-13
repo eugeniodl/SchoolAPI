@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using School_API;
 using School_API.Data;
+using School_API.Filters;
 using School_API.Repository;
 using School_API.Repository.IRepository;
 
@@ -17,7 +18,11 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    //options.Filters.Add(new MyLogging());
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
