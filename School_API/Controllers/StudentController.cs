@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +26,7 @@ namespace School_API.Controllers
             _mapper = mapper;
         }
 
+        [Authorize]
         [HttpGet]        
         [MyLoggingAsync("AllStudents")]
         [MyLogging("AllStudents")]
