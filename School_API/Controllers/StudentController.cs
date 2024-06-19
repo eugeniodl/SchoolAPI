@@ -10,7 +10,7 @@ using SharedModels.Dto;
 
 namespace School_API.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [Route("api/[controller]")]
     [ApiController]
     public class StudentController : ControllerBase
@@ -26,10 +26,10 @@ namespace School_API.Controllers
             _logger = logger;
             _mapper = mapper;
         }
-                
+
         [HttpGet]
         [MyLoggingAsync("AllStudents")]
-        [MyLogging("AllStudents")]        
+        [MyLogging("AllStudents")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -149,7 +149,7 @@ namespace School_API.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> PutStudent(int id, StudentUpdateDto updateDto)
         {
-            if(updateDto == null || id != updateDto.StudentId)
+            if (updateDto == null || id != updateDto.StudentId)
             {
                 return BadRequest("Los datos de entrada no son válidos " +
                     "o el ID del estudiante no coincide.");
@@ -174,9 +174,9 @@ namespace School_API.Controllers
                 _logger.LogInformation($"Estudiante con ID {id} actualizado correctamente.");
                 return NoContent();
             }
-            catch(DbUpdateConcurrencyException ex)
+            catch (DbUpdateConcurrencyException ex)
             {
-                if(!await _studentRepo.ExistsAsync(s => s.StudentId == id))
+                if (!await _studentRepo.ExistsAsync(s => s.StudentId == id))
                 {
                     _logger.LogWarning($"No se encontró ningún estudiante con ID: {id}");
                     return NotFound("El estudiante no se encontró durante la actualización.");
@@ -217,7 +217,7 @@ namespace School_API.Controllers
                 }
 
                 await _studentRepo.DeleteAsync(student);
-                
+
                 _logger.LogInformation($"Estudiante con ID {id} eliminado correctamente.");
                 return NoContent();
             }
@@ -236,10 +236,10 @@ namespace School_API.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PatchStudent(int id, 
+        public async Task<IActionResult> PatchStudent(int id,
             JsonPatchDocument<StudentUpdateDto> patchDto)
         {
-            if(id <= 0)
+            if (id <= 0)
             {
                 return BadRequest("ID de estudiante no válido.");
             }

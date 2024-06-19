@@ -31,5 +31,11 @@ namespace School
             _httpClient.DefaultRequestHeaders.Authorization 
                 = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
         }
+
+        internal void SetAuthToken(string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization
+                = new AuthenticationHeaderValue("Bearer", token);
+        }
     }
 }

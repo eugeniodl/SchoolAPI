@@ -8,6 +8,7 @@ namespace School
 {
     public interface IUserRepository
     {
-        Task<bool> AuthenticateUserAsync(string username, string password);
+        //Task<bool> AuthenticateUserAsync(string username, string password);
+        Task<string> AuthenticateUserAsync(string username, string password);
     }
 }

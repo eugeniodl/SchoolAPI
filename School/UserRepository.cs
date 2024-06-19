@@ -19,7 +19,7 @@ namespace School
             _httpClient = httpClient;
             _endpoint = endpoint;
         }
-
+        /*
         public async Task<bool> AuthenticateUserAsync(string username, string password)
         {
             var loginDto = new LoginUserDto { UserName = username, Password = password };
@@ -40,6 +40,25 @@ namespace School
             else
             {
                 return false;
+            }
+        }
+        */
+        public async Task<string> AuthenticateUserAsync(string username, string password)
+        {
+            var loginDto = new LoginUserDto { UserName = username, Password = password };
+            var content = new StringContent(JsonConvert.SerializeObject(loginDto),
+                Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(_endpoint, content);
+
+            if(response.IsSuccessStatusCode)
+            {
+                var responseData = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<dynamic>(responseData).token;
+            }
+            else
+            {
+                throw new Exception("Invalid credentials");
             }
         }
     }

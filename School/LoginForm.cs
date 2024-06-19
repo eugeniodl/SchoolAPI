@@ -29,6 +29,31 @@ namespace School
             string username = txtUserName.Text;
             string password = txtPassword.Text;
 
+            var token = await _apiClient.LoginUsers.AuthenticateUserAsync(username, password);
+
+            if (!string.IsNullOrEmpty(token)) 
+            {
+                MessageBox.Show("Login successful!");
+
+                // Guardar el token para futuras solicitudes
+                _apiClient.SetAuthToken(token);
+
+                Hide();
+                var mainForm = new StudentForm(_apiClient);
+                mainForm.Show();
+            }
+            else
+            {
+                MessageBox.Show("Login failed. Please check your username and password.");
+            }
+        }
+
+        /*
+        private async Task LoginAsync()
+        {
+            string username = txtUserName.Text;
+            string password = txtPassword.Text;
+
             if(await _apiClient.LoginUsers.AuthenticateUserAsync(username, password))
             {
                 MessageBox.Show("Login successful!");
@@ -44,5 +69,6 @@ namespace School
                 MessageBox.Show("Login failed. Please check your username and password.");
             }
         }
+        */
     }
 }
