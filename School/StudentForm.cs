@@ -14,10 +14,10 @@ namespace School
     public partial class StudentForm : Form
     {
         private readonly ApiClient _apiClient;
-        public StudentForm()
+        public StudentForm(ApiClient apiClient)
         {
             InitializeComponent();
-            _apiClient = new ApiClient();
+            _apiClient = apiClient;
         }
 
         private async void StudentForm_Load(object sender, EventArgs e)
